@@ -1,0 +1,100 @@
+/*
+ * theme.css
+ * Variáveis CSS do sistema — carregadas dinamicamente pelo JS
+ * a partir das configurações salvas na aba Config da planilha.
+ *
+ * Os valores abaixo são os padrões (fallback) usados antes de
+ * getConfigCompleto() retornar. O JS sobrescreve via
+ * document.documentElement.style.setProperty() após login.
+ */
+
+:root {
+  /* Cores principais (editáveis pelo admin) */
+  --cor-primaria:    #6A5C5E;
+  --cor-secundaria:  #DFAA86;
+  --cor-fundo:       #F37D56;
+  --cor-texto:       #B4C8A3;
+
+  /* Derivadas — calculadas a partir das principais */
+  --cor-primaria-escura:   color-mix(in srgb, var(--cor-primaria) 80%, #000);
+  --cor-primaria-clara:    color-mix(in srgb, var(--cor-primaria) 60%, #fff);
+  --cor-secundaria-clara:  color-mix(in srgb, var(--cor-secundaria) 60%, #fff);
+  --cor-fundo-suave:       color-mix(in srgb, var(--cor-fundo) 12%, #fff);
+  --cor-fundo-medio:       color-mix(in srgb, var(--cor-fundo) 25%, #fff);
+
+  /* Neutros fixos */
+  --branco:    #FFFFFF;
+  --cinza-50:  #F9F9F8;
+  --cinza-100: #F1F0EE;
+  --cinza-200: #E4E2DE;
+  --cinza-300: #C9C6C0;
+  --cinza-400: #9E9A94;
+  --cinza-500: #6E6A64;
+  --cinza-600: #4A4743;
+  --cinza-700: #2E2C29;
+  --cinza-800: #1A1917;
+  --preto:     #0D0C0B;
+
+  /* Semânticas */
+  --cor-valido:    #4A7C59;
+  --cor-invalido:  #B84040;
+  --cor-na:        #7A7066;
+  --cor-pendente:  #B07830;
+  --cor-andamento: #3A6898;
+
+  --cor-valido-bg:    color-mix(in srgb, #4A7C59 12%, #fff);
+  --cor-invalido-bg:  color-mix(in srgb, #B84040 12%, #fff);
+  --cor-na-bg:        color-mix(in srgb, #7A7066 10%, #fff);
+  --cor-pendente-bg:  color-mix(in srgb, #B07830 12%, #fff);
+  --cor-andamento-bg: color-mix(in srgb, #3A6898 12%, #fff);
+
+  /* Tipografia */
+  --fonte-display: 'Playfair Display', 'Georgia', serif;
+  --fonte-corpo:   'DM Sans', 'Trebuchet MS', sans-serif;
+  --fonte-mono:    'DM Mono', 'Courier New', monospace;
+
+  /* Escala tipográfica */
+  --texto-xs:   0.75rem;   /* 12px */
+  --texto-sm:   0.875rem;  /* 14px */
+  --texto-base: 1rem;      /* 16px */
+  --texto-md:   1.125rem;  /* 18px */
+  --texto-lg:   1.25rem;   /* 20px */
+  --texto-xl:   1.5rem;    /* 24px */
+  --texto-2xl:  1.875rem;  /* 30px */
+  --texto-3xl:  2.25rem;   /* 36px */
+
+  /* Espaçamento */
+  --esp-1:  0.25rem;
+  --esp-2:  0.5rem;
+  --esp-3:  0.75rem;
+  --esp-4:  1rem;
+  --esp-5:  1.25rem;
+  --esp-6:  1.5rem;
+  --esp-8:  2rem;
+  --esp-10: 2.5rem;
+  --esp-12: 3rem;
+  --esp-16: 4rem;
+
+  /* Bordas */
+  --raio-sm:  4px;
+  --raio-md:  8px;
+  --raio-lg:  12px;
+  --raio-xl:  16px;
+  --raio-full: 9999px;
+
+  /* Sombras */
+  --sombra-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --sombra-md: 0 4px 12px rgba(0,0,0,.10), 0 2px 4px rgba(0,0,0,.06);
+  --sombra-lg: 0 10px 30px rgba(0,0,0,.12), 0 4px 10px rgba(0,0,0,.08);
+  --sombra-xl: 0 20px 50px rgba(0,0,0,.15), 0 8px 20px rgba(0,0,0,.10);
+
+  /* Transições */
+  --trans-rapida:  120ms ease;
+  --trans-normal:  220ms ease;
+  --trans-suave:   350ms cubic-bezier(.4,0,.2,1);
+
+  /* Layout */
+  --largura-sidebar:    240px;
+  --largura-max:        1400px;
+  --altura-header:      56px;
+}
