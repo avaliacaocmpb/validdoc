@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValidaDoc</title>
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    /* Estilos específicos do shell principal */
+
+    /* Tela de inicialização (antes do app carregar) */
+    #tela-init {
+      position: fixed;
+      inset: 0;
+      background: var(--cinza-50);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--esp-4);
+      z-index: 9999;
+      transition: opacity .4s ease;
+    }
+
+    #tela-init.saindo {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .init-logo {
+      font-family: var(--fonte-display);
+      font-size: var(--texto-2xl);
+      color: var(--cor-primaria);
+      letter-spacing: -.02em;
+    }
+
+    /* Seletor de formulário no header */
+    .header-formulario-select {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: var(--raio-md);
+      color: var(--branco);
+      padding: var(--esp-2) var(--esp-3);
+      font-size: var(--texto-sm);
+      font-family: var(--fonte-corpo);
+      cursor: pointer;
+      max-width: 200px;
+    }
+
+    .header-formulario-select option {
+      background: var(--cor-primaria-escura);
+      color: var(--branco);
+    }
+
+    /* Modo revisão toggle (supervisor) */
+    .modo-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--esp-2);
+      font-size: var(--texto-xs);
+      color: rgba(255,255,255,.7);
+      cursor: pointer;
+      padding: var(--esp-2) var(--esp-3);
+      border-radius: var(--raio-md);
+      border: 1px solid rgba(255,255,255,.15);
+      transition: all var(--trans-rapida);
+    }
+
+    .modo-toggle:hover { background: rgba(255,255,255,.08); }
+
+    .modo-toggle input[type=checkbox] {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--cor-secundaria);
+    }
+
+    /* Separador de nav */
+    .nav-divider {
+      height: 1px;
+      background: var(--cinza-200);
+      margin: var(--esp-2) var(--esp-4);
+    }
+
+    /* Botão de logout na sidebar */
+    .sidebar-logout .btn {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Tela de inicialização -->
+  <div id="tela-init">
+    <div class="spinner spinner-lg"></div>
+    <div class="init-logo" id="init-nome">ValidaDoc</div>
+    <span style="font-size:var(--texto-sm);color:var(--cinza-400)">Carregando configurações...</span>
+  </div>
+
+  <!-- Layout principal (escondido até inicializar) -->
+  <div class="app-layout" id="app-layout" style="display:none">
+
+    <!-- ── Header ── -->
+    <header class="app-header">
+      <div>
+        <div class="app-header__titulo" id="header-nome-sistema">ValidaDoc</div>
+        <div class="app-header__sigla" id="header-escola">Sistema de Validação Documental</div>
+      </div>
+
+      <!-- Seletor de formulário (aparece quando há mais de um) -->
+      <select class="header-formulario-select" id="select-formulario"
+              style="display:none" onchange="trocarFormulario(this.value)">
+      </select>
+
+      <!-- Toggle modo revisão (só supervisor e admin) -->
+      <label class="modo-toggle" id="toggle-revisao" style="display:none">
+        <input type="checkbox" id="checkbox-revisao" onchange="trocarModoRevisao(this.checked)">
+        Modo revisão
+      </label>
+
+      <!-- Info do usuário -->
+      <div class="app-header__usuario">
+        <div class="app-header__avatar" id="header-avatar">?</div>
+        <div>
+          <div class="app-header__nome" id="header-nome-usuario">—</div>
+          <div class="app-header__papel" id="header-papel">—</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Sidebar ── -->
+    <aside class="app-sidebar">
+      <nav>
+        <!-- Seção principal (todos os papéis) -->
+        <div class="nav-section">
+          <div class="nav-section__titulo">Principal</div>
+
+          <button class="nav-item" data-tela="dashboard" onclick="navegarPara('dashboard')">
+            <span class="nav-item__icone" id="icone-dashboard"></span>
+            Dashboard
+          </button>
+
+          <button class="nav-item" data-tela="validacao" onclick="navegarPara('validacao')">
+            <span class="nav-item__icone" id="icone-validar"></span>
+            Validação
+          </button>
+        </div>
+
+        <!-- Seção supervisor/admin -->
+        <div class="nav-section" id="secao-supervisor" style="display:none">
+          <div class="nav-divider"></div>
+          <div class="nav-section__titulo">Supervisão</div>
+
+          <button class="nav-item" data-tela="invalidos" onclick="navegarPara('invalidos')">
+            <span class="nav-item__icone" id="icone-revisao"></span>
+            Documentos inválidos
+          </button>
+
+          <button class="nav-item" data-tela="auditoria" onclick="navegarPara('auditoria')">
+            <span class="nav-item__icone" id="icone-auditoria"></span>
+            Auditoria
+          </button>
+        </div>
+
+        <!-- Seção admin -->
+        <div class="nav-section" id="secao-admin" style="display:none">
+          <div class="nav-divider"></div>
+          <div class="nav-section__titulo">Administração</div>
+
+          <button class="nav-item" data-tela="usuarios" onclick="navegarPara('usuarios')">
+            <span class="nav-item__icone" id="icone-usuarios"></span>
+            Usuários
+          </button>
+
+          <button class="nav-item" data-tela="config-sistema" onclick="navegarPara('config-sistema')">
+            <span class="nav-item__icone" id="icone-config"></span>
+            Configurações
+          </button>
+        </div>
+      </nav>
+
+      <!-- Logout -->
+      <div class="sidebar-logout" style="margin-top:auto">
+        <button class="btn btn-fantasma" onclick="fazerLogout()">
+          <span id="icone-sair"></span>
+          Sair
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── Área de conteúdo ── -->
+    <main class="app-conteudo" id="conteudo-principal">
+      <!-- Preenchido dinamicamente pelo roteador de telas -->
+    </main>
+
+  </div>
+
+  <!-- Scripts base -->
+  <script src="js/api.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
+
+  <!-- Módulos de tela -->
+  <script src="js/dashboard.js"></script>
+  <script src="js/validacao.js"></script>
+  <script src="js/invalidos.js"></script>
+  <script src="js/auditoria.js"></script>
+  <script src="js/usuarios.js"></script>
+  <script src="js/config-sistema.js"></script>
+
+  <script>
+    // ══════════════════════════════════════════════════════════════════════
+    // Shell principal — roteamento, inicialização e controles globais
+    // ══════════════════════════════════════════════════════════════════════
+
+    let telaAtual = 'dashboard';
+
+    // ── Inicialização ──────────────────────────────────────────────────────
+
+    (async function init() {
+
+      // Verifica sessão
+      if (!State.usuario.logado) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Carrega configurações completas (tema, campos, docs)
+      try {
+        const cfg = await Api.getConfigCompleto();
+        if (cfg) {
+          State.carregarConfig(cfg);
+          document.getElementById('init-nome').textContent    = State.nomeSistema;
+          document.getElementById('header-nome-sistema').textContent = State.nomeSistema;
+          document.title = State.nomeSistema;
+
+          const escola = cfg.config?.sistema_escola || 'Sistema de Validação Documental';
+          document.getElementById('header-escola').textContent = escola;
+        }
+      } catch (e) {
+        console.warn('Erro ao carregar config:', e.message);
+      }
+
+      // Preenche dados do usuário no header
+      _preencherHeader();
+
+      // Configura sidebar por papel
+      _configurarSidebar();
+
+      // Injeta ícones
+      _injetarIcones();
+
+      // Popula seletor de formulários
+      _popularFormularios();
+
+      // Remove tela de init com transição suave
+      const telaInit = document.getElementById('tela-init');
+      telaInit.classList.add('saindo');
+      setTimeout(() => {
+        telaInit.remove();
+        document.getElementById('app-layout').style.display = 'grid';
+      }, 400);
+
+      // Navega para tela inicial
+      navegarPara('dashboard');
+
+    })();
+
+    // ── Header ────────────────────────────────────────────────────────────
+
+    function _preencherHeader() {
+      const nome  = State.usuario.nome;
+      const papel = State.usuario.papel;
+
+      document.getElementById('header-nome-usuario').textContent = nome;
+      document.getElementById('header-papel').textContent        = papel;
+      document.getElementById('header-avatar').textContent       = iniciaisNome(nome);
+    }
+
+    // ── Sidebar ───────────────────────────────────────────────────────────
+
+    function _configurarSidebar() {
+      if (State.podeSupervisor()) {
+        document.getElementById('secao-supervisor').style.display = 'block';
+        document.getElementById('toggle-revisao').style.display   = 'flex';
+      }
+      if (State.podeAdmin()) {
+        document.getElementById('secao-admin').style.display = 'block';
+      }
+    }
+
+    function _injetarIcones() {
+      document.getElementById('icone-dashboard').innerHTML  = Icone.dashboard();
+      document.getElementById('icone-validar').innerHTML    = Icone.validar();
+      document.getElementById('icone-revisao').innerHTML    = Icone.revisao();
+      document.getElementById('icone-auditoria').innerHTML  = Icone.auditoria();
+      document.getElementById('icone-usuarios').innerHTML   = Icone.usuarios();
+      document.getElementById('icone-config').innerHTML     = Icone.config();
+      document.getElementById('icone-sair').innerHTML       = Icone.sair();
+    }
+
+    // ── Seletor de formulários ────────────────────────────────────────────
+
+    function _popularFormularios() {
+      const forms = State.formularios;
+      const select = document.getElementById('select-formulario');
+
+      if (forms.length <= 1) {
+        // Com um único formulário não precisa de seletor
+        if (forms.length === 1) State.formularioAtivo = forms[0].nomevalor;
+        select.style.display = 'none';
+        return;
+      }
+
+      select.innerHTML = '<option value="">Todos os formulários</option>';
+      forms.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.nomevalor;
+        opt.textContent = f.nomevalor;
+        select.appendChild(opt);
+      });
+      select.style.display = 'block';
+    }
+
+    function trocarFormulario(valor) {
+      State.formularioAtivo = valor;
+      // Recarrega a tela atual com o novo filtro
+      navegarPara(telaAtual, true);
+    }
+
+    function trocarModoRevisao(ativo) {
+      State.modoRevisao = ativo;
+    }
+
+    // ── Roteamento de telas ───────────────────────────────────────────────
+
+    /**
+     * Navega para uma tela, chamando a função de render do módulo JS correspondente.
+     * Cada módulo expõe uma função render<NomeTela>(container).
+     */
+    function navegarPara(tela, forcar = false) {
+      if (tela === telaAtual && !forcar) return;
+      telaAtual = tela;
+
+      // Marca item ativo na sidebar
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('ativo', el.dataset.tela === tela);
+      });
+
+      const container = document.getElementById('conteudo-principal');
+      container.innerHTML = htmlCarregando('Carregando...');
+      container.classList.remove('animado-entrada');
+
+      // Pequeno delay para garantir que a animação de entrada seja visível
+      setTimeout(() => {
+        container.classList.add('animado-entrada');
+
+        try {
+          switch (tela) {
+            case 'dashboard':     renderDashboard(container);   break;
+            case 'validacao':     renderValidacao(container);   break;
+            case 'invalidos':     renderInvalidos(container);   break;
+            case 'auditoria':     renderAuditoria(container);   break;
+            case 'usuarios':      renderUsuarios(container);    break;
+            case 'config-sistema':renderConfigSistema(container); break;
+            default:
+              container.innerHTML = htmlVazio('Tela não encontrada', `"${tela}" não existe.`, '🔍');
+          }
+        } catch (e) {
+          container.innerHTML = `
+            <div class="alerta alerta-erro">
+              Erro ao carregar a tela: ${e.message}
+            </div>`;
+        }
+      }, 60);
+    }
+
+    // ── Logout ────────────────────────────────────────────────────────────
+
+    async function fazerLogout() {
+      const confirmado = await Modal.confirmar({
+        titulo: 'Sair do sistema',
+        mensagem: 'Tem certeza que deseja encerrar sua sessão?',
+        textoBotao: 'Sair',
+        tipo: 'perigo'
+      });
+      if (!confirmado) return;
+
+      try { await Api.auth.logout(); } catch(e) { /* ignora */ }
+      State.usuario.limpar();
+      window.location.href = 'index.html';
+    }
+
+  </script>
+</body>
+</html>
