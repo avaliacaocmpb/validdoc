@@ -39,6 +39,7 @@ async function renderInvalidos(container) {
                 <th>Formulário</th>
                 <th>Docs inválidos</th>
                 <th>Validado em</th>
+                <th>Situação</th>
                 <th>Status</th>
                 <th></th>
               </tr>
@@ -55,6 +56,11 @@ async function renderInvalidos(container) {
                     ).join('')}
                   </td>
                   <td style="font-size:var(--texto-sm);color:var(--cinza-400)">${formatarDataHora(insc.validadoEm)}</td>
+                  <td>
+                    <span class="badge ${insc.situacao === 'DEFERIDA' ? 'badge-valido' : 'badge-invalido'}">
+                      ${insc.situacao || '—'}
+                    </span>
+                  </td>
                   <td>${badgeStatus(insc.status)}</td>
                   <td>
                     <button class="btn btn-secundario btn-sm" onclick="event.stopPropagation();abrirInscricaoRevisao(${insc.linhaReal})">
